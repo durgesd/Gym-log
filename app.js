@@ -4,7 +4,6 @@
 (function(){
 'use strict';
 
-/* ---------------- utils ---------------- */
 const $  = (s, r) => (r || document).querySelector(s);
 const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 const uid = () => Math.random().toString(36).slice(2,9) + Date.now().toString(36).slice(-4);
@@ -40,7 +39,6 @@ function dateParts(iso){
 }
 const e1RM = (w, r) => (num(w) > 0 && num(r) > 0) ? num(w) * (1 + num(r)/30) : 0;
 
-/* ---------------- constants ---------------- */
 const DB_KEY = 'gymlog.pro.v1';
 const MUSCLES = ['Chest','Back','Shoulders','Biceps','Triceps','Forearms','Quads','Hamstrings','Glutes','Calves','Core','Traps','Full Body','Cardio'];
 const EQUIPMENT = ['Barbell','Dumbbell','Machine','Cable','Bodyweight','Kettlebell','Band','Smith Machine','EZ Bar','Other'];
@@ -50,9 +48,7 @@ const MUSCLE_ICON = {
   'Full Body':'🏋️', Cardio:'❤️', Other:'⚙️'
 };
 const PLATE_COLORS = ['var(--accent)','#4ade80','#60a5fa','#f472b6','#fbbf24','#a78bfa','#22d3ee','#fb923c'];
-const DEFAULT_SETTINGS = {
-  unit:'kg', rest:90, autoRest:true, sound:true, vibrate:true, rpe:false, theme:'dark'
-};
+const DEFAULT_SETTINGS = { unit:'kg', rest:90, autoRest:true, sound:true, vibrate:true, rpe:false, theme:'dark' };
 
 const BUILTIN = [
   ['Barbell Bench Press','Chest','Barbell'],['Incline Barbell Bench Press','Chest','Barbell'],
@@ -109,7 +105,6 @@ const BUILTIN = [
   ['Stair Climber','Cardio','Machine'],['Jump Rope','Cardio','Other'],['Elliptical','Cardio','Machine'],
 ].map(([name, muscle, equipment]) => ({ name, muscle, equipment }));
 
-/* ---------------- state ---------------- */
 let db = {
   version: 1,
   settings: Object.assign({}, DEFAULT_SETTINGS),
@@ -153,7 +148,6 @@ function saveNow(){
 }
 const save = saveNow;
 
-/* ---------------- derived ---------------- */
 function allExercises(){
   const map = new Map();
   BUILTIN.forEach(e => map.set(e.name.toLowerCase(), { name:e.name, muscle:e.muscle, equipment:e.equipment, custom:false }));
@@ -196,7 +190,6 @@ function newSetFor(ex){
   return { id:uid(), weight:'', reps:'', done:false, warmup:false, rpe:'' };
 }
 
-/* ---------------- toast ---------------- */
 let _toastT;
 function toast(msg, ms){
   const el = $('#toast');
@@ -206,7 +199,6 @@ function toast(msg, ms){
   _toastT = setTimeout(() => el.classList.remove('show'), ms || 2000);
 }
 
-/* ---------------- icons ---------------- */
 const I = {
   plus:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
   check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4.5 4.5L19 7"/></svg>',
@@ -218,13 +210,9 @@ const I = {
   edit:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>'
 };
 
-/* ================================================================
-   RENDER — WORKOUT
-   ================================================================ */
 function renderWorkout(){
   const el = $('#view-workout');
   const s  = db.active;
-
   if (!s){
     const recent = db.history.slice(0, 3);
     el.innerHTML = `
@@ -252,7 +240,6 @@ function renderWorkout(){
       </div>`;
     return;
   }
-
   const vol  = sessVolume(s);
   const sets = sessSets(s);
   const doneSets = s.exercises.reduce((a,e) => a + e.sets.filter(x => x.done).length, 0);
@@ -267,13 +254,9 @@ function renderWorkout(){
         <span class="chip accent" id="sessVol">${fmt(vol)} ${db.settings.unit}</span>
       </div>
     </div>
-
     <div id="exList">${s.exercises.map(exerciseCardHtml).join('')}</div>
-
     ${s.exercises.length ? '' : `<div class="note-inline" style="margin-bottom:12px;"><span class="i">💡</span><span>Add your first exercise below. Pick from 130+ built-ins or create your own.</span></div>`}
-
     <button class="btn primary wide" data-act="add-exercise" style="margin-top:4px;">${I.plus} Add exercise</button>
-
     <div class="row" style="margin-top:10px;gap:9px;">
       <button class="btn ghost" style="flex:1;" data-act="session-note">📝 Notes</button>
       <button class="btn ghost" style="flex:1;" data-act="save-template">📋 Template</button>
@@ -282,7 +265,6 @@ function renderWorkout(){
       <button class="btn primary" style="flex:1.6;" data-act="finish">Finish workout</button>
       <button class="btn danger" style="flex:1;" data-act="discard">Discard</button>
     </div>
-
     <div class="muted center" style="margin-top:16px;font-size:12px;font-weight:600;">
       ${doneSets} / ${sets} sets completed · ${s.exercises.length} exercise${s.exercises.length===1?'':'s'}
     </div>
@@ -294,13 +276,11 @@ function exerciseCardHtml(ex){
   const vol  = exVolume(ex);
   const lp   = lastPerformance(ex.name);
   const showRpe = !!db.settings.rpe;
-
   let prevTxt = '';
   if (lp && lp.sets.length){
     const parts = lp.sets.filter(s => !s.warmup).slice(0,4).map(s => `${fmtD(s.weight)}×${fmt(s.reps)}`);
     if (parts.length) prevTxt = `<div class="ex-prev">Last: <b>${parts.join(' · ')}</b></div>`;
   }
-
   const headCols = `
     <div class="set-head">
       <span class="c-set">Set</span>
@@ -309,7 +289,6 @@ function exerciseCardHtml(ex){
       ${showRpe ? '<span class="c-rpe">RPE</span>' : ''}
       <span class="c-act" style="text-align:right;padding-right:2px;">Done</span>
     </div>`;
-
   return `
   <div class="ex-card" data-exid="${ex.id}">
     <div class="ex-top">
@@ -349,8 +328,7 @@ function setRowHtml(ex, st, i){
       <input type="number" inputmode="numeric" min="0" data-f="reps" value="${st.reps === '' || st.reps == null ? '' : st.reps}" placeholder="0">
       <span class="u">reps</span>
     </div>
-    ${showRpe ? `
-    <div class="field rpe">
+    ${showRpe ? `<div class="field rpe">
       <input type="number" inputmode="decimal" min="1" max="10" step="0.5" data-f="rpe" value="${esc(st.rpe || '')}" placeholder="–">
     </div>` : ''}
     <div class="set-act">
@@ -360,11 +338,7 @@ function setRowHtml(ex, st, i){
   </div>`;
 }
 
-/* ================================================================
-   RENDER — HISTORY
-   ================================================================ */
 let historyFilter = 'all';
-
 function renderHistory(){
   const el = $('#view-history');
   if (!db.history.length){
@@ -382,7 +356,6 @@ function renderHistory(){
     if (historyFilter === 'month') return days <= 31;
     return true;
   });
-
   el.innerHTML = `
     <div class="chips">
       ${[['all','All'],['week','7 days'],['month','30 days']].map(([k,l]) =>
@@ -399,7 +372,6 @@ function historyCardHtml(s){
   const { d, m } = dateParts(s.date);
   const sets = sessSets(s);
   const dur  = s.finishedAt && s.startedAt ? fmtDur(s.finishedAt - s.startedAt) : '';
-
   const body = s.exercises.map(e => {
     const meta = exerciseMeta(e.name);
     const best = e.sets.reduce((mx, st) => Math.max(mx, e1RM(st.weight, st.reps)), 0);
@@ -420,7 +392,6 @@ function historyCardHtml(s){
         </div>
       </div>`;
   }).join('');
-
   return `
     <div class="hist-card" data-sid="${s.id}">
       <div class="hist-head" data-act="toggle-hist">
@@ -444,11 +415,7 @@ function historyCardHtml(s){
     </div>`;
 }
 
-/* ================================================================
-   RENDER — STATS
-   ================================================================ */
 let statsExercise = '';
-
 function renderStats(){
   const el = $('#view-stats');
   if (!db.history.length){
@@ -456,16 +423,13 @@ function renderStats(){
       <p>Finish a workout to unlock volume charts, muscle breakdown and personal records.</p></div>`;
     return;
   }
-
   const totalVol  = db.history.reduce((a,s) => a + sessVolume(s), 0);
   const totalSets = db.history.reduce((a,s) => a + sessSets(s), 0);
-
   const now = new Date(); now.setHours(0,0,0,0);
   const dow = (now.getDay() + 6) % 7;
   const monday = new Date(now); monday.setDate(now.getDate() - dow);
   const weekSessions = db.history.filter(s => new Date(s.date + 'T00:00:00') >= monday);
   const weekVol = weekSessions.reduce((a,s) => a + sessVolume(s), 0);
-
   let streak = 0;
   {
     const wk = new Date(monday);
@@ -480,10 +444,8 @@ function renderStats(){
       else if (i > 0) break;
     }
   }
-
   const recent = db.history.slice(0, 12).reverse();
   const maxVol = Math.max(1, ...recent.map(sessVolume));
-
   const muscleSets = {};
   db.history.forEach(s => s.exercises.forEach(e => {
     const m = exerciseMeta(e.name).muscle || 'Other';
@@ -491,7 +453,6 @@ function renderStats(){
   }));
   const muscleArr = Object.entries(muscleSets).sort((a,b) => b[1]-a[1]);
   const maxMuscle = Math.max(1, ...muscleArr.map(x => x[1]));
-
   const prs = {};
   db.history.forEach(s => s.exercises.forEach(e => {
     e.sets.forEach(st => {
@@ -503,10 +464,8 @@ function renderStats(){
     });
   }));
   const prList = Object.entries(prs).sort((a,b) => b[1].orm - a[1].orm).slice(0, 12);
-
   const loggedNames = Array.from(new Set(db.history.flatMap(s => s.exercises.map(e => e.name)))).sort();
   if (!statsExercise || !loggedNames.includes(statsExercise)) statsExercise = loggedNames[0] || '';
-
   let sparkHtml = '';
   if (statsExercise){
     const pts = [];
@@ -530,7 +489,6 @@ function renderStats(){
       sparkHtml = `<div class="muted center" style="padding:24px;font-size:13px;">No weighted sets logged for this exercise.</div>`;
     }
   }
-
   const bw = db.bodyweight.slice().sort((a,b) => a.date.localeCompare(b.date));
   let bwHtml = '';
   if (bw.length >= 2){
@@ -546,7 +504,6 @@ function renderStats(){
         </div>
       </div>`;
   }
-
   el.innerHTML = `
     <div class="stat-grid">
       <div class="stat"><div class="k">${I.dumbbell} Workouts</div><div class="v">${db.history.length}</div><div class="d">${totalSets} total sets</div></div>
@@ -554,7 +511,6 @@ function renderStats(){
       <div class="stat"><div class="k">This week</div><div class="v">${fmt(weekVol)}<small>${db.settings.unit}</small></div><div class="d">${weekSessions.length} session${weekSessions.length===1?'':'s'}</div></div>
       <div class="stat"><div class="k">${I.fire} Streak</div><div class="v">${streak}<small>wk${streak===1?'':'s'}</small></div><div class="d">${streak>=2?'keep it going!':'train weekly'}</div></div>
     </div>
-
     <div class="sec-title">Volume trend <span class="ln"></span> last ${recent.length}</div>
     <div class="chart-card">
       <div class="bars">
@@ -570,7 +526,6 @@ function renderStats(){
         }).join('')}
       </div>
     </div>
-
     ${muscleArr.length ? `
       <div class="sec-title">Muscle distribution <span class="ln"></span> working sets</div>
       <div class="chart-card">
@@ -581,13 +536,11 @@ function renderStats(){
             <span class="mg-val">${c}</span>
           </div>`).join('')}
       </div>` : ''}
-
     <div class="sec-title">Exercise progress <span class="ln"></span> estimated 1RM</div>
     <select class="sel" data-act="pick-stat-ex">
       ${loggedNames.map(n => `<option value="${esc(n)}" ${n===statsExercise?'selected':''}>${esc(n)}</option>`).join('')}
     </select>
     ${sparkHtml}
-
     ${prList.length ? `
       <div class="sec-title">Personal records <span class="ln"></span> top ${prList.length}</div>
       ${prList.map(([name, p], i) => `
@@ -599,7 +552,6 @@ function renderStats(){
           </div>
           <span class="pr-val">${fmt(p.orm)}<span style="font-size:10px;color:var(--text-mute);font-weight:700;"> ${db.settings.unit}</span></span>
         </div>`).join('')}` : ''}
-
     <div class="sec-title">Body weight <span class="ln"></span> optional</div>
     ${bwHtml}
     <button class="btn ghost wide" style="margin-top:10px;" data-act="add-bw">＋ Log body weight</button>
@@ -630,12 +582,8 @@ function sparkSvg(values, idSuffix){
   </svg>`;
 }
 
-/* ================================================================
-   RENDER — LIBRARY
-   ================================================================ */
 let libFilter = 'All';
 let libSearch = '';
-
 function renderLibrary(){
   const el = $('#view-library');
   const all = allExercises();
@@ -645,7 +593,6 @@ function renderLibrary(){
     (libFilter === 'All' || e.muscle === libFilter) &&
     (!q || e.name.toLowerCase().includes(q) || e.muscle.toLowerCase().includes(q))
   );
-
   el.innerHTML = `
     <button class="btn primary wide" data-act="new-exercise" style="margin-bottom:12px;">${I.plus} Create custom exercise</button>
     <div class="note-inline" style="margin-bottom:14px;">
@@ -675,14 +622,10 @@ function renderLibrary(){
   `;
 }
 
-/* ================================================================
-   RENDER — SETTINGS
-   ================================================================ */
 function renderSettings(){
   const el = $('#view-settings');
   const s = db.settings;
   const units = ['kg','lb'];
-
   el.innerHTML = `
     <div class="set-group">
       <div class="set-item">
@@ -701,7 +644,6 @@ function renderSettings(){
         </div></div>
       </div>
     </div>
-
     <div class="sec-title">Rest timer <span class="ln"></span></div>
     <div class="set-group">
       <div class="set-item">
@@ -727,7 +669,6 @@ function renderSettings(){
         <div class="ctl"><button class="switch ${s.vibrate?'on':''}" data-act="tg" data-k="vibrate"></button></div>
       </div>
     </div>
-
     <div class="sec-title">Logging <span class="ln"></span></div>
     <div class="set-group">
       <div class="set-item">
@@ -741,7 +682,6 @@ function renderSettings(){
         <div class="ctl"><button class="btn xs soft" data-act="goto-library">Manage</button></div>
       </div>
     </div>
-
     <div class="sec-title">Data <span class="ln"></span></div>
     <div class="set-group">
       <div class="set-item">
@@ -760,7 +700,6 @@ function renderSettings(){
         <div class="ctl"><button class="btn xs danger" data-act="wipe">Delete</button></div>
       </div>
     </div>
-
     <div class="set-group">
       <div class="set-item">
         <div class="ico">📲</div>
@@ -768,16 +707,12 @@ function renderSettings(){
         <div class="ctl"><button class="btn xs primary" data-act="install-help">How</button></div>
       </div>
     </div>
-
     <div class="muted center" style="font-size:11.5px;padding:8px 20px 20px;line-height:1.7;font-weight:600;">
       GymLog Pro · v1.0<br>100% offline · your data never leaves this device
     </div>
   `;
 }
 
-/* ================================================================
-   TAB SWITCHING
-   ================================================================ */
 let currentTab = 'workout';
 function switchTab(tab){
   currentTab = tab;
@@ -788,11 +723,7 @@ function switchTab(tab){
   $('#main').scrollTop = 0;
 }
 function renderAll(){
-  renderWorkout();
-  renderHistory();
-  renderStats();
-  renderLibrary();
-  renderSettings();
+  renderWorkout(); renderHistory(); renderStats(); renderLibrary(); renderSettings();
 }
 function renderCurrent(){
   switch(currentTab){
@@ -804,11 +735,7 @@ function renderCurrent(){
   }
 }
 
-/* ================================================================
-   REST TIMER
-   ================================================================ */
 const rest = { endAt:0, total:0, timer:null, active:false };
-
 function startRest(sec){
   sec = clamp(Math.round(sec), 5, 3600);
   rest.total  = sec;
@@ -863,9 +790,6 @@ function beep(){
   } catch(e){}
 }
 
-/* ================================================================
-   MODAL SYSTEM
-   ================================================================ */
 function openModal(inner, opts){
   const m = $('#modal');
   m.innerHTML = `<div class="sheet">${inner}</div>`;
@@ -938,7 +862,6 @@ function openExerciseForm(presetName, editName){
   const name    = editing ? editing.name : (presetName || '');
   const muscle  = editing ? editing.muscle : 'Chest';
   const equip   = editing ? editing.equipment : 'Barbell';
-
   openModal(`
     <div class="sheet-grip"></div>
     <div class="sheet-head"><h3>${editing ? 'Edit exercise' : 'New exercise'}</h3><button class="icon-btn" data-act="close-modal">${I.x}</button></div>
@@ -982,7 +905,6 @@ function openExerciseMenu(exId){
   const s = db.active;
   const idx = s.exercises.findIndex(e => e.id === exId);
   const meta = exerciseMeta(ex.name);
-
   openModal(`
     <div class="sheet-grip"></div>
     <div class="sheet-head"><h3 style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(ex.name)}</h3><button class="icon-btn" data-act="close-modal">${I.x}</button></div>
@@ -1110,9 +1032,6 @@ function confirmSheet(title, message, confirmLabel, onConfirm, danger){
   }});
 }
 
-/* ================================================================
-   WORKOUT OPERATIONS
-   ================================================================ */
 function startWorkout(name){
   if (db.active && db.active.exercises.length){
     confirmSheet('Replace workout?', 'You already have an active workout. Starting a new one will discard it.', 'Start new', () => {
@@ -1215,9 +1134,6 @@ function repeatHistory(sid){
   } else doIt();
 }
 
-/* ================================================================
-   EVENT DELEGATION
-   ================================================================ */
 document.addEventListener('click', e => {
   const tabBtn = e.target.closest('.tabbar button');
   if (tabBtn){ switchTab(tabBtn.dataset.tab); return; }
@@ -1238,7 +1154,6 @@ document.addEventListener('click', e => {
     case 'pick-filter':  pickerFilter = el.dataset.m; renderPickerChips(); renderPickerList($('#pickSearch')?.value || ''); break;
     case 'pick-ex':      addExerciseToSession(el.dataset.name); break;
     case 'pick-new':     openExerciseForm(el.dataset.name); break;
-
     case 'add-set': {
       const ex = findEx(exId); if (!ex) break;
       const st = newSetFor(ex);
@@ -1318,7 +1233,6 @@ document.addEventListener('click', e => {
         toast('Discarded');
       }, true);
       break;
-
     case 'hist-filter': historyFilter = el.dataset.f; renderHistory(); break;
     case 'toggle-hist': {
       const hc = el.closest('.hist-card');
@@ -1337,7 +1251,6 @@ document.addEventListener('click', e => {
       }, true);
       break;
     }
-
     case 'add-bw': openBodyWeight(); break;
     case 'save-bw': {
       const w = num($('#bwInput').value);
@@ -1356,7 +1269,6 @@ document.addEventListener('click', e => {
       saveNow(); openBodyWeight(); renderStats();
       break;
     }
-
     case 'lib-filter': libFilter = el.dataset.m; renderLibrary(); break;
     case 'new-exercise': openExerciseForm(); break;
     case 'new-exercise-named': openExerciseForm(el.dataset.name); break;
@@ -1396,14 +1308,8 @@ document.addEventListener('click', e => {
       }, true);
       break;
     }
-
     case 'set-unit': db.settings.unit = el.dataset.u; saveNow(); renderSettings(); renderCurrent(); toast('Unit: ' + el.dataset.u); break;
-    case 'set-theme': {
-      db.settings.theme = el.dataset.t;
-      applyTheme();
-      saveNow(); renderSettings();
-      break;
-    }
+    case 'set-theme': db.settings.theme = el.dataset.t; applyTheme(); saveNow(); renderSettings(); break;
     case 'tg': {
       const k = el.dataset.k;
       db.settings[k] = !db.settings[k];
@@ -1425,14 +1331,12 @@ document.addEventListener('click', e => {
       }, true);
       break;
     case 'install-help': openInstallHelp(); break;
-
     case 'rest-skip':  hideRest(); break;
     case 'rest-plus':  rest.endAt += 15000; rest.total += 15; tickRest(); break;
     case 'rest-minus': rest.endAt = Math.max(Date.now(), rest.endAt - 15000); rest.total = Math.max(15, rest.total - 15); tickRest(); break;
   }
 });
 
-/* live input */
 document.addEventListener('input', e => {
   const t = e.target;
   if (t.id === 'sessionName' && db.active){ db.active.name = t.value; save(); return; }
@@ -1498,9 +1402,6 @@ function renumberSets(exId){
   });
 }
 
-/* ================================================================
-   EXPORT / IMPORT
-   ================================================================ */
 function exportData(){
   try {
     const payload = { app:'GymLog Pro', exportedAt:new Date().toISOString(), data: db };
@@ -1544,14 +1445,10 @@ function importData(){
   inp.click();
 }
 
-/* ================================================================
-   INSTALL HELP
-   ================================================================ */
 function openInstallHelp(){
   const ua = navigator.userAgent;
   const isIOS = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
-
   openModal(`
     <div class="sheet-grip"></div>
     <div class="sheet-head"><h3>Install GymLog</h3><button class="icon-btn" data-act="close-modal">${I.x}</button></div>
@@ -1582,9 +1479,6 @@ function openInstallHelp(){
   `);
 }
 
-/* ================================================================
-   THEME
-   ================================================================ */
 function applyTheme(){
   const t = db.settings.theme === 'light' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', t);
@@ -1592,9 +1486,6 @@ function applyTheme(){
   if (meta) meta.setAttribute('content', t === 'dark' ? '#0a0b0e' : '#f1f3f7');
 }
 
-/* ================================================================
-   PWA INSTALL
-   ================================================================ */
 let deferredPrompt = null;
 const installBtn = $('#installBtn');
 
@@ -1631,7 +1522,6 @@ setTimeout(() => {
   }
 }, 1500);
 
-/* Register service worker */
 if ('serviceWorker' in navigator){
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js')
@@ -1640,9 +1530,6 @@ if ('serviceWorker' in navigator){
   });
 }
 
-/* ================================================================
-   LIVE CLOCK
-   ================================================================ */
 setInterval(() => {
   if (!db.active || currentTab !== 'workout') return;
   const el = $('#sessDur');
@@ -1651,9 +1538,6 @@ setInterval(() => {
   }
 }, 30000);
 
-/* ================================================================
-   BOOT
-   ================================================================ */
 load();
 applyTheme();
 renderAll();
