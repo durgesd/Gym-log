@@ -616,8 +616,8 @@ function renderLibrary(){
         ` : `<button class="btn xs soft" data-act="quick-add" data-name="${esc(e.name)}">+ Log</button>`}
       </div>`).join('')
     : `<div class="muted center" style="padding:40px 0;font-size:13.5px;">
-         No exercises match “${esc(libSearch)}”.<br><br>
-         <button class="btn primary sm" data-act="new-exercise-named" data-name="${esc(libSearch)}">+ Create “${esc(libSearch)}”</button>
+         No exercises match "${esc(libSearch)}".<br><br>
+         <button class="btn primary sm" data-act="new-exercise-named" data-name="${esc(libSearch)}">+ Create "${esc(libSearch)}"</button>
        </div>`}
   `;
 }
@@ -841,7 +841,7 @@ function renderPickerList(q){
     html += `<button class="ex-pick create" data-act="pick-new" data-name="${esc(query)}">
       <span class="pi">${I.plus}</span>
       <span style="flex:1;min-width:0;">
-        <span class="pn">Create “${esc(query)}”</span>
+        <span class="pn">Create "${esc(query)}"</span>
         <span class="pm">Custom exercise with your own details</span>
       </span></button>`;
   }
@@ -854,7 +854,7 @@ function renderPickerList(q){
       </span>
       <span style="color:var(--text-mute);font-size:18px;font-weight:300;">＋</span>
     </button>`).join('');
-  el.innerHTML = html || `<div class="muted center" style="padding:34px 0;font-size:13.5px;">No exercises match “${esc(q)}”.</div>`;
+  el.innerHTML = html || `<div class="muted center" style="padding:34px 0;font-size:13.5px;">No exercises match "${esc(q)}".</div>`;
 }
 
 function openExerciseForm(presetName, editName){
@@ -918,11 +918,11 @@ function openExerciseMenu(exId){
         <textarea class="input" id="exNote" rows="3" placeholder="Tempo, cues, seat height…" style="resize:vertical;min-height:80px;font-size:15px;">${esc(ex.notes || '')}</textarea></div>
       <div class="sec-title">Actions <span class="ln"></span></div>
       <div style="display:flex;flex-direction:column;gap:8px;">
-        <button class="btn ghost wide" style="justify-content:flex-start;" data-act="move-ex" data-dir="-1" ${idx===0?'disabled':''}>↑ Move up</button>
-        <button class="btn ghost wide" style="justify-content:flex-start;" data-act="move-ex" data-dir="1" ${idx===s.exercises.length-1?'disabled':''}>↓ Move down</button>
-        <button class="btn ghost wide" style="justify-content:flex-start;" data-act="dup-ex">⧉ Duplicate exercise</button>
+        <button class="btn ghost wide" style="justify-content:flex-start;" data-act="move-ex" data-exid="${exId}" data-dir="-1" ${idx===0?'disabled':''}>↑ Move up</button>
+        <button class="btn ghost wide" style="justify-content:flex-start;" data-act="move-ex" data-exid="${exId}" data-dir="1" ${idx===s.exercises.length-1?'disabled':''}>↓ Move down</button>
+        <button class="btn ghost wide" style="justify-content:flex-start;" data-act="dup-ex" data-exid="${exId}">⧉ Duplicate exercise</button>
         ${meta.custom ? `<button class="btn ghost wide" style="justify-content:flex-start;" data-act="edit-exercise" data-name="${esc(ex.name)}">✎ Edit custom exercise</button>` : ''}
-        <button class="btn danger wide" style="justify-content:flex-start;" data-act="del-exercise">🗑 Remove from workout</button>
+        <button class="btn danger wide" style="justify-content:flex-start;" data-act="del-exercise" data-exid="${exId}">🗑 Remove from workout</button>
       </div>
     </div>
     <div class="sheet-foot">
@@ -1086,7 +1086,7 @@ function moveExercise(exId, dir){
 function deleteExercise(exId){
   const s = db.active; if (!s) return;
   const ex = findEx(exId); if (!ex) return;
-  confirmSheet('Remove exercise?', `“${esc(ex.name)}” and its ${ex.sets.length} set${ex.sets.length===1?'':'s'} will be removed from this workout.`, 'Remove', () => {
+  confirmSheet('Remove exercise?', `"${esc(ex.name)}" and its ${ex.sets.length} set${ex.sets.length===1?'':'s'} will be removed from this workout.`, 'Remove', () => {
     s.exercises = s.exercises.filter(e => e.id !== exId);
     saveNow(); closeModal(); renderWorkout();
     toast('Removed');
@@ -1142,7 +1142,8 @@ document.addEventListener('click', e => {
   if (!el) return;
   const act = el.dataset.act;
   const card = el.closest('.ex-card');
-  const exId = card ? card.dataset.exid : null;
+  // ✅ FIX: read exId from the button itself first (for modal buttons)
+  const exId = el.dataset.exid || (card ? card.dataset.exid : null);
 
   switch(act){
     case 'goto-workout': closeModal(); switchTab('workout'); break;
@@ -1301,7 +1302,7 @@ document.addEventListener('click', e => {
     }
     case 'delete-custom': {
       const name = el.dataset.name;
-      confirmSheet('Delete exercise?', `“${esc(name)}” will be removed from your library. Past workouts are unaffected.`, 'Delete', () => {
+      confirmSheet('Delete exercise?', `"${esc(name)}" will be removed from your library. Past workouts are unaffected.`, 'Delete', () => {
         db.custom = db.custom.filter(c => c.name !== name);
         saveNow(); closeModal(); renderLibrary();
         toast('Deleted');
