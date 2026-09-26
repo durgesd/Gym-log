@@ -1,0 +1,17 @@
+{
+  "name": "GymLog Pro — Workout Tracker",
+  "short_name": "GymLog",
+  "description": "Professional offline workout tracker with custom exercises, PR tracking and progress analytics.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#0a0b0e",
+  "theme_color": "#0a0b0e",
+  "categories": ["health", "fitness", "sports"],
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
